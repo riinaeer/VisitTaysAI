@@ -338,7 +338,7 @@
           "value": "1rr80I0tl00E_bEe_cyzun00HlYw30ORh",
           "mode": "list",
           "cachedResultName": "visittays",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/1rr80I0tl00E_bEe_cyzun00HlYw30ORh"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/"
         },
         "event": "fileCreated",
         "options": {}
@@ -825,7 +825,7 @@
     },
     {
       "parameters": {
-        "content": "#  Google Drive Stored in Vector\n## All of you can access:\n### https://drive.google.com/drive/u/0/folders/1A2DK9uy_oLf-yL1na2hC-YYbiGzBxUPf?ths\n## 4 google doc files (not all are complete, some are empty, I just added a bunch FOR TESTING)\n- Contact Information\n- Cancelling appointments\n- Buildings\n- About TAYS Hospital",
+        "content": "#  Google Drive Stored in Vector\n## "
         "height": 320,
         "width": 900,
         "color": 3
@@ -873,7 +873,7 @@
         "filter": {
           "folderId": {
             "__rl": true,
-            "value": "https://drive.google.com/drive/folders/1A2DK9uy_oLf-yL1na2hC-YYbiGzBxUPf",
+            "value": "https://drive.google.com/drive/folders/",
             "mode": "url"
           }
         },
@@ -913,7 +913,7 @@
         "triggerOn": "specificFolder",
         "folderToWatch": {
           "__rl": true,
-          "value": "https://drive.google.com/drive/folders/1rr80I0tl00E_bEe_cyzun00HlYw30ORh?usp=sharing://drive.google.com/drive/folders/1A2DK9uy_oLf-yL1na2hC-YYbiGzBxUPf",
+          "value": "https://drive.google.com/drive/folders/",
           "mode": "url"
         },
         "event": "watchFolderUpdated"
