@@ -1,0 +1,1601 @@
+{
+  "name": "VisitTaysAI rag, tts, telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "description": "=Get the key information from the database and answer the user's questions. If multiple options are available, e.g. by phone, by visiting etc. please have a Q&A with the user and structure the response by first stating the total number of options and then list each option clearly as possible.",
+        "topK": 5
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        2180,
+        1800
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "visittays",
+          "mode": "list",
+          "cachedResultName": "visittays"
+        },
+        "options": {
+          "pineconeNamespace": "visittays"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.1,
+      "position": [
+        2080,
+        1960
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "The namespace to retrieve data must match the same namespace in the RAG workflow's vectore storage."
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_ID_HERE",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        600
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Default Data Loader",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_ID_HERE",
+      "typeVersion": 1,
+      "position": [
+        2740,
+        740
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Recursive Character Text Splitter",
+      "notes": "If a Google Document has e.g. 5,000 characters, it will chunk/divide all that information into 1,000 characters of information. The higher it is the more resource intensive it is."
+    },
+    {
+      "parameters": {
+        "content": "# Changes to RAG + AIAgent Chatbot\n- Added TTS and STT\n- Able to reply either by Text or Audio\n- Simplified the system prompt for the Q&A Vectore Store module and just set it to 5 Top K = (most relevant results)\n- Changed the memory to 5 previous messages to lower hallucinations\n- Refined the systemp prompt and added some guardrails, ensuring the bot prioritize information from the database and match it with the user's query and previous messages, ensuring correct and up-to-date information\n- Started using ChatGPT-4o instead of 4o-mini for better processing\n\n## Limitations\n- Google Routes API can only be executed if all 3 parameters (origin, destination and travel mode are said in 1 MSG)\n- When responding with an audio file (TTS), the caption of the audio file returns the markdown values in plain text (so I removed the caption). An audio file + a text message after will be shown.",
+        "height": 360,
+        "width": 1100
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        620
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Changes to Vector Storage\n- Refined Google Drive fetching workflow - basing it on any file or folder updates\n- Added looping (this is in case we reach 20 + files)\n- Changed Embedded Batch Size to 20 (files) instead of 200 (files) ➡️ if exceeds 20, update the batch size\n- Set Data Loader Format to Automatic as we are already retrieving ID + Name\n- Changed recursive char text chunking to 1000 (chars) each, so if a documnet contains 5,000 chars, it will chunk the information into 5 runs. Also changed changed chunking overlap to 200 (chars) in case some information are split apart",
+        "height": 320,
+        "width": 860
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        20
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        2120
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Embeddings 3-small",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2200,
+        400
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Loop Over Items",
+      "notesInFlow": false,
+      "notes": "This will keep looping the process, storing all Google files/folder 1 by 1 into the PineCone Vector Store\nLooping is useful for many files e.g. over 20."
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 1536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.2,
+      "position": [
+        2600,
+        600
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "1536D-3-small",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "OpenAI's default and max dimension for GPT-4o / 4o-mini is 1536 dimensions.\nPineCone must also use 1536 dimensions.\nYOUR_ID_HERE is enough."
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Taysa and I'm your friendly assistant and help you navigate to TAYS. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        700
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "When chat message received",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        380,
+        900
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "OpenAI Chat Model",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        1200
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "OpenAI Chat Model1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        1340
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Embeddings OpenAI",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        280
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Embeddings OpenAI1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are Taysa AI, a hospital wayfinding assistant at Tampere University Hospital. You are a middle-aged woman, speaking calmly, respectfully, simply, and with a friendly, matter-of-fact tone. You are empathetic, safety-focused, patient, and calm. You assist especially low-vision and blind users, avoiding words like \"look\" or \"see.\"\nBehavior rules:\n- Speak clearly and in short, informative sentences (max 200-300 characters per sentence).\n- Pause briefly between instructions.\n- Confirm understanding often.\n- Always offer help navigating and respect accessibility preferences.\nCapabilities:\n- Give real-time, step-by-step navigation.\n- Describe surroundings when needed.\n- Integrate with public transport information (Nysse, GPS).\n- Offer haptic cues or safety tips where appropriate.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        460,
+        700
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "AI Agent1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 200
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        920
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Simple Memory1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "description": "Returns documents related on TAYS hospital contact information and public transportation. Answers only based on retrieved data."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        980
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Answer questions with a vector store1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "visittays",
+          "mode": "list",
+          "cachedResultName": "visittays"
+        },
+        "options": {
+          "pineconeNamespace": "visittays"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.1,
+      "position": [
+        540,
+        1160
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Pinecone Vector Store2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## RAG workflow\nThis is just a basic rag workflow without telegram. \n\nYou can try to chat with it:\n\n<YOUR_ID_HERE>",
+        "height": 240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        260,
+        280
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note3",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "YOUR_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "visittays",
+          "cachedResultUrl": "<YOUR_ID_HERE>"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1,
+      "position": [
+        240,
+        40
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Google Drive Trigger1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        460,
+        40
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Google Drive2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "file",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_ID_HERE",
+      "typeVersion": 1,
+      "position": [
+        860,
+        260
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Default Data Loader1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 20,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_ID_HERE",
+      "typeVersion": 1,
+      "position": [
+        960,
+        480
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Recursive Character Text Splitter1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "visittays",
+          "mode": "list",
+          "cachedResultName": "visittays"
+        },
+        "options": {
+          "pineconeNamespace": "visittays"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        40
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Pinecone Vector Store3",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## RAG + Chatbot",
+        "height": 100,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        560
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note4",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "# Riina's workflow\n## Fetching data and embedding it and adding it to vectorstore\n\nThe base for RAG",
+        "height": 180,
+        "width": 860
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -160
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note5",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=chat_id: {{ $('TelegramOnMsg').first().json.message.chat.id }}\nuser_id: {{ $('TelegramOnMsg').first().json.message.from.id }}\nuser_name: {{ $('TelegramOnMsg').first().json.message.from.first_name }}\nuser_text: {{ $json.stt_output || $json.message.text }}\norigin_address: {{ $json.origin_address || '' }}\ndestination_address: {{ $json.destination_address || '' }}\ntravel_mode: {{ $json.travel_mode || '' }}\nplaces_query: {{ $json.places_query || '' }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Based on the user_text, extract the following and return as JSON:\n- User's text query\n- Chat info\n- User info\n- Origin and destination addresses\n- Travel mode e.g. BUS or LIGHT_RAIL = also called tram\n- Places query e.g. bus stop near Koskikeskus Shopping Centre\n\nEnsure the departure datetime is in the future:\nCurrent date: {{ $now }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1760,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Basic LLM Chain",
+      "notes": "Responsible for analysing 'key words' from the user's query (text/audio file) and parse them meaningfully into a JSON format based on the data structure"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"chat_id\": {\n      \"type\": \"string\",\n      \"description\": \"Unique identifier for the Telegram chat.\"\n    },\n    \"user_id\": {\n      \"type\": \"string\",\n      \"description\": \"Unique identifier for the Telegram user.\"\n    },\n    \"user_name\": {\n      \"type\": \"string\",\n      \"description\": \"First name of the Telegram user.\"\n    },\n    \"user_text\": {\n      \"type\": \"string\",\n      \"description\": \"Combined text input from user message and any speech-to-text transcription.\"\n    },\n    \"origin_address\": {\n      \"type\": \"string\",\n      \"description\": \"Starting location for the transit request.\"\n    },\n    \"destination_address\": {\n      \"type\": \"string\",\n      \"description\": \"Ending location or destination for the transit request.\"\n    },\n    \"travel_mode\": {\n      \"type\": \"string\",\n      \"description\": \"Mode of travel such as driving, walking, bicycling, or transit.\"\n    },\n    \"places_query\": {\n      \"type\": \"string\",\n      \"description\": \"Query for place-related searches such as 'restaurants near me'.\"\n    }\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_ID_HERE",
+      "typeVersion": 1.2,
+      "position": [
+        1920,
+        1660
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Structured Output Parser",
+      "notes": "This is the data structure = parameters required"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Collect the origin, destination and travel mode to retrieve route directions. Collect all these details from your memory first before executing.\n",
+        "method": "POST",
+        "url": "https://routes.googleapis.com/directions/v2:computeRoutes",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-Goog-Api-Key",
+              "valueProvider": "fieldValue",
+              "value": "<YOUR_ID_HERE>"
+            },
+            {
+              "name": "X-Goog-FieldMask",
+              "valueProvider": "fieldValue",
+              "value": "routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.duration,routes.distanceMeters"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"origin\": {\n    \"address\": \"{{ $json.output.origin_address }}\"\n  },\n  \"destination\": {\n    \"address\": \"{{ $json.output.destination_address }}\"\n  },\n  \"travelMode\": \"TRANSIT\",\n  \"YOUR_ID_HERE\": true,\n  \"YOUR_CREDENTIAL_ID_HERE\": {\n    \"YOUR_CREDENTIAL_ID_HERE\": \"LESS_WALKING\",\n    \"YOUR_CREDENTIAL_ID_HERE\": [\n      \"{{ $json.output.travel_mode }}\"\n    ]\n  },\n  \"departureTime\": \"{{ $now }}\"\n}",
+        "optimizeResponse": true,
+        "responseType": "text"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2420,
+        1660
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "GoogleRoutesAPI"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1440,
+        1740
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "STT",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "Transcribes the audio file (speech to text)"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "={{ $json.message.text || '' }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "YOUR_ID_HERE"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "YOUR_ID_HERE",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "={{ $json.message.voice.file_id }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Switch",
+      "notes": "This separatets what is text and what is audio\nIf it's audio it needs to go through the TTS workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output.user_text }}",
+        "options": {
+          "systemMessage": "=- When answering any hospital-related question, always use the \"Answer questions with a vector store\" tool to retrieve information from the database. Do not rely solely on your own knowledge or previous messages, especially if there is conflicting information. Only use your own reasoning or memory if the vector store tool does not return a relevant answer.\n- You are Taysa, a hospital wayfinding assistant at Tampere University Hospital (TAYS Hospital).\n- Use \"Answer questions with a vector store\" on building answers and Google Routes API node when needed.\n- Always match the user's query with the database rather than relying solely on past messages, especially if the data is conflicting.\n- Always offer help navigating the hospital.\n- Your primary users include blind and low-vision individuals. Avoid vision-related language like \"look\" or \"see\", and respect accessibility preferences.\n- If there are too many routes, prioritize the best and fastest route.\n- Keep responses within 600 characters.\n- Confirm understanding frequently.\n- If a user goes off-topic, engage briefly, then gently return to your role.\n- Address user's name: {{ $json.output.user_name }} meaningfully, particularly in greetings and farewells.\n\nTravel Search:\n- Always attempt to retrieve missing values from memory or prior context.\n- If any values are still missing, engage naturally with the user to ask for them.\n- Only execute the Google Routes request if ALL 3 of the following parameters are available:\n{{ $json.output.origin_address && $json.output.destination_address && $json.output.travel_mode }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        2140,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "VisitTaysAI_Agent",
+      "notes": "Not all of the system prompt works, but it's good enough\ne.g. even if the AI can remember up to 10 previous messages it won't work unless all 3  google routes parameters are retrieved"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1260,
+        1740
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "GetFile",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "Gets the audio file"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "YOUR_ID_HERE",
+              "name": "stt_output",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1620,
+        1740
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Edit STT Field",
+      "notes": "Give the output a meaningful name"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('TelegramOnMsg').first().json.message.from.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.3,
+      "position": [
+        2200,
+        1640
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Memory",
+      "notes": "Context windnow = number of previous messages it should remember. The bigger it is the harder it is for the AI and the more it eats up the context window length.\n\nRemembers 5 previous messages."
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1260,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "TelegramOnMsg",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "Listens for any message / audio / docs sent by the user within the Telegram bot and relays the data"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.output }}",
+        "voice": "shimmer",
+        "options": {
+          "response_format": "opus"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2680,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "TTS",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "OPUS = to show the wave form"
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('TelegramOnMsg').first().json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2940,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Reply TTS",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('TelegramOnMsg').first().json.message.chat.id }}",
+        "text": "=>>> TAYSA <<<\n\n{{ $('VisitTaysAI_Agent').item.json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2960,
+        1680
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Reply Text",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Requirements\n## Telegram API Key (Free)\n## OpenAI API Key (5 euros is enough)\n## Google API Key (Free $300 credits something)\n## PineCone API Key (Free)\n\n# Q&A Tested\n### Question | Actual Output\n- Gets the user's name ✅\n- \"Hi there\" ✅ Greets the user\n- \"I wanna travel to TAYS Hospital\" ❌ Cannot retrieve the routes even if it remembers in memory\n- \"I wanna travel to TAYS Hospital from Tampere University City Campus by Bus\" ✅ Retrieves the best and shortest routes based on the time and date now (limitation)\n- \"Can you remember where I wanna go?\" ✅ Remembers the origin, destination and travel mode\n- \"What can you tell me about Floor 1 on TAYS Hospital?\" ✅ Retrieves the correct services\n- \"I wanna cancel an appointment, but I don't want to go out\" ✅ Retrieves the correct options to cancel an appointment\n- \"I wanna cancel by phone then, what's the number of the eye centre?\" ✅ Retrieves the correct phone number",
+        "height": 600,
+        "width": 900,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        -80
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "#  Google Drive Stored in Vector\n## All of you can access:\n### <YOUR_ID_HERE>\n## 4 google doc files (not all are complete, some are empty, I just added a bunch FOR TESTING)\n- Contact Information\n- Cancelling appointments\n- Buildings\n- About TAYS Hospital",
+        "height": 320,
+        "width": 900,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        20
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1860,
+        400
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Download Files",
+      "alwaysOutputData": true,
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "Downloads the files/folders as binary based on the file ID"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "<YOUR_ID_HERE>",
+            "mode": "url"
+          }
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        400
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Search File/Folders",
+      "alwaysOutputData": false,
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "This searches for any files or folders within the directory folder\nGets ID and Name fields of those files/folders"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "<YOUR_ID_HERE>",
+          "mode": "url"
+        },
+        "event": "YOUR_CREDENTIAL_ID_HERE"
+      },
+      "type": "n8n-nodes-base.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        400
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "OnFolderUpdated",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "Watches a specific fodler based on the URL for any changes e.g. added new files or updated new files\nFor every minute"
+    },
+    {
+      "parameters": {
+        "content": "# Iteration 6 - UPDATED RAG (Updated: Mikaela)\n# See Sample DEMO: ",
+        "height": 140,
+        "width": 2540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        -160
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# PineCone Vectore Store Guidelines\n- Make sure it matches the namespace or index name\n- Delete old namespaces or even vector stores indexes and restart\n\n# Notes:\n## If you open a node and click on 'Settings' it should show the description of that node (if it exists) and should explain what it does",
+        "height": 320,
+        "width": 700,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        20
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "visittays",
+          "mode": "list",
+          "cachedResultName": "visittays"
+        },
+        "embeddingBatchSize": 20,
+        "options": {
+          "pineconeNamespace": "visittays"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.YOUR_CREDENTIAL_ID_HERE",
+      "typeVersion": 1.1,
+      "position": [
+        2600,
+        400
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Pinecone Vector Storage",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      },
+      "notes": "Embedded Batch Size = what is the max amount Google files/dolders can be embedded into the PineCone Vectore Store"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "YOUR_ID_HERE",
+              "leftValue": "={{ $('Switch').item.json.message.voice.file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2540,
+        1460
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "If STT exists",
+      "notes": "If speech to text exists then reply by audio\nIf not, reply by text only"
+    },
+    {
+      "parameters": {
+        "content": "# End",
+        "height": 440,
+        "width": 280,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2900,
+        1400
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# Start",
+        "height": 200,
+        "width": 280,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        1420
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1780,
+        1600
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "GPT-4o-(2)",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2520,
+        1860
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "GPT-4o-(1)",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {
+          "maxTokens": 16384
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2100,
+        1680
+      ],
+      "id": "YOUR_ID_HERE",
+      "name": "GPT-4o",
+      "credentials": {
+        "openAiApi": "YOUR_OPENAI_API_KEY_HERE",
+        "pineconeApi": "YOUR_PINECONE_API_KEY_HERE",
+        "googleDriveOAuth2Api": "YOUR_GOOGLE_OAUTH_CREDENTIALS_HERE",
+        "telegramApi": "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "VisitTaysAI_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Storage",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings 3-small": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Pinecone Vector Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1536D-3-small": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Storage",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store2": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store1",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive2": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "VisitTaysAI_Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleRoutesAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "VisitTaysAI_Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STT": {
+      "main": [
+        [
+          {
+            "node": "Edit STT Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GetFile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VisitTaysAI_Agent": {
+      "main": [
+        [
+          {
+            "node": "If STT exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetFile": {
+      "main": [
+        [
+          {
+            "node": "STT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit STT Field": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "VisitTaysAI_Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TelegramOnMsg": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TTS": {
+      "main": [
+        [
+          {
+            "node": "Reply TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply TTS": {
+      "main": [
+        [
+          {
+            "node": "Reply Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Files": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search File/Folders": {
+      "main": [
+        [
+          {
+            "node": "Download Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OnFolderUpdated": {
+      "main": [
+        [
+          {
+            "node": "Search File/Folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Storage": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If STT exists": {
+      "main": [
+        [
+          {
+            "node": "TTS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o-(2)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o-(1)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT-4o": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "VisitTaysAI_Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "YOUR_ID_HERE",
+  "meta": {
+    "instanceId": "YOUR_INSTANCE_ID_OR_ENV_INFO_HERE"
+  },
+  "id": "YOUR_CREDENTIAL_ID_HERE",
+  "tags": []
+}
